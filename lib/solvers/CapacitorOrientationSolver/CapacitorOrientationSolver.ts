@@ -11,12 +11,12 @@ import type {
   SchematicPlacementIssue,
 } from "../../types"
 import { addAttr } from "../../utils/format"
-import { PlacementNetworkIndex } from "../../utils/placement-network-index"
 import {
   highlightPlacement,
   mergeGraphicsObjects,
   visualizeCircuitJson,
 } from "../../utils/graphics"
+import { PlacementNetworkIndex } from "../../utils/placement-network-index"
 import type { SolverContext } from "../SolverContext"
 
 export interface Capacitor {
@@ -73,7 +73,8 @@ export class CapacitorOrientationSolver extends BaseSolver {
     this.orientationExemptCapacitorIds = new Set(
       this.capacitorPlacements.flatMap((capacitor) =>
         capacitor.sourceComponentId &&
-        (networks.isDirectOpAmpFeedback(capacitor.sourceComponentId) ||
+        (networks.isDirectOpAmpFeedback(capacitor.sourceComponentId) !==
+          false ||
           networks.isLocalFloatingChipCapacitor(capacitor.sourceComponentId))
           ? [capacitor.sourceComponentId]
           : [],
@@ -209,7 +210,7 @@ export class CapacitorOrientationSolver extends BaseSolver {
       return
 
     // Feedback and local floating chip-return capacitors need not be vertical
-    // supply shunts. Separate placement checks still assess their relationships.
+    // supply shunts. Missing op-amp roles cannot establish that a capacitor is not feedback.
     if (this.orientationExemptCapacitorIds.has(placement.sourceComponentId))
       return
 
